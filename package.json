@@ -1,0 +1,32 @@
+{
+  "name": "kv2",
+  "version": "0.0.0",
+  "description": "Interface for key-value backing stores",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava spec/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattstyles/kv2.git"
+  },
+  "keywords": [
+    "key",
+    "value",
+    "etcd",
+    "async",
+    "stream"
+  ],
+  "author": "Matt Styles <matt@veryfizzyjelly.com> (http://github.com/mattstyles)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mattstyles/kv2/issues"
+  },
+  "homepage": "https://github.com/mattstyles/kv2#readme",
+  "devDependencies": {
+    "ava": "^0.14.0"
+  },
+  "dependencies": {
+    "superagent": "^2.0.0-alpha.3"
+  }
+}
