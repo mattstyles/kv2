@@ -4,7 +4,9 @@
   "description": "Interface for key-value backing stores",
   "main": "index.js",
   "scripts": {
-    "test": "ava spec/*.js"
+    "echo": "echo $PWD",
+    "test": "docker run --rm -v $PWD:/app etcd-test /app/spec/start.sh",
+    "test-local": "ava spec/*.js"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,7 @@
 
 import test from 'ava'
-
 import KV from '../'
+
 
 test( 'kv2 should grab a value from the store', async t => {
   let kv = KV({
