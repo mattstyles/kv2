@@ -29,6 +29,25 @@ module.exports = function etcd( endpoint ) {
             resolve( res.body.node.value )
           })
       })
+    },
+
+    set: function( key, value ) {
+      // @TODO stringify value when necessary
+      return new Promise( ( resolve, reject ) => {
+        req.put( uri + key )
+          .send( 'value=' + value )
+          .end( ( err, res ) => {
+            if ( err ) {
+              reject( err )
+              return
+            }
+
+            let node = res.body.node
+            let prev = res.body.prevNode
+
+            resolve({ node, prev })
+          })
+      })
     }
   }
 }

@@ -16,6 +16,14 @@ module.exports = function kv( opts ) {
           .then( resolve )
           .catch( reject )
       })
+    },
+
+    set: function( key, value ) {
+      return new Promise( ( resolve, reject ) => {
+        store.set( key, value )
+          .then( resolve )
+          .catch( reject )
+      })
     }
   }
 }
