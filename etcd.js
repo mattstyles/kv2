@@ -38,24 +38,33 @@ module.exports = function etcd( opts ) {
       })
     },
 
+    /**
+     * @note Current version of etcd2 does not seem to support refresh properly
+     */
     set: function( key, value, options ) {
       let opts = options || {
         ttl: null,
-        raw: false
+        refresh: false
       }
 
       if ( util.isObject( value ) ) {
         value = JSON.stringify( value )
       }
 
-      let body = 'value=' + value
+      let body = []
+      if ( !opts.refresh ) {
+        body.push( `value=${ value }` )
+      } else {
+        console.warn( 'Etcd refresh tends to kill values, this might not work correctly' )
+        body.push( 'refresh=true' )
+      }
       if ( opts.ttl ) {
-        body += ';ttl=' + opts.ttl
+        body.push( `ttl=${ opts.ttl }` )
       }
 
       return new Promise( ( resolve, reject ) => {
         req.put( uri + key )
-          .send( body )
+          .send( body.join( ';' ) )
           .end( ( err, res ) => {
             if ( err ) {
               reject( err )

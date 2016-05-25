@@ -82,6 +82,36 @@ test( 'kv2 should set a value with a ttl', async t => {
 })
 
 /**
+ * Tests currently use 2.2.3 which does not support refresh properly, it
+ * always kills the value rendering it useless
+ */
+test.skip( 'kv2 should refresh a value with a ttl', async t => {
+  let kv = KV({
+    store: 'etcd',
+    url: 'http://0.0.0.0:2379'
+  })
+
+  t.is( await kv.get( 'boot' ), null )
+  await kv.set( 'boot', 'foo', {
+    ttl: 10
+  })
+  await wait( 2000 )
+  let res = await kv.get( 'boot', {
+    raw: true
+  })
+  t.true( res.node.ttl < 10 )
+  await kv.set( 'boot', null, {
+    refresh: true,
+    ttl: 10
+  })
+  let ref = await kv.get( 'boot', {
+    raw: true
+  })
+  t.is( ref.node.ttl, 10 )
+  t.is( ref.node.value, 'foo' )
+})
+
+/**
  * Using an identifier namespace
  */
 test( 'kv2 should grab a key from an identifier directory', async t => {
