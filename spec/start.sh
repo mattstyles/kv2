@@ -6,5 +6,5 @@ echo "Setting base store"
 etcdctl set foo bar
 etcdctl set bar baz
 etcdctl mkdir net
-etcdctl set net/foo foo
+etcdctl set net/foo netbar
 npm run test-local -- -v

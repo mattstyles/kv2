@@ -1,29 +1,38 @@
 
 'use strict'
 
+function promisify( named, store ) {
+  let fn = function() {
+    return new Promise( ( resolve, reject ) => {
+      store[ named ].call( store, ...arguments )
+        .then( resolve )
+        .then( reject )
+    })
+  }
+  Object.defineProperty( fn, 'name', {
+    value: named
+  })
+  return fn
+}
+
 module.exports = function kv( opts ) {
 
   let store = null
 
   if ( opts.store === 'etcd' ) {
-    store = require( './etcd' )( opts.url )
+    store = require( './etcd' )( opts )
   }
 
-  return {
-    get: function( key ) {
-      return new Promise( ( resolve, reject ) => {
-        store.get( key )
-          .then( resolve )
-          .catch( reject )
-      })
-    },
+  const wrapper = {}
+  const methods = [
+    'set',
+    'get',
+    'del'
+  ]
 
-    set: function( key, value ) {
-      return new Promise( ( resolve, reject ) => {
-        store.set( key, value )
-          .then( resolve )
-          .catch( reject )
-      })
-    }
-  }
+  methods.forEach( method => {
+    wrapper[ method ] = promisify( method, store )
+  })
+
+  return wrapper
 }

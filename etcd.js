@@ -1,12 +1,13 @@
 
 'use strict'
 
+const util = require( 'util' )
 const url = require( 'url' )
 const req = require( 'superagent' )
 
-module.exports = function etcd( endpoint ) {
+module.exports = function etcd( opts ) {
 
-  const uri = endpoint + '/v2/keys/'
+  const uri = opts.url + '/v2/keys' + ( opts.id ? '/' + opts.id : '' ) + '/'
 
   return {
     get: function( key ) {
@@ -32,7 +33,10 @@ module.exports = function etcd( endpoint ) {
     },
 
     set: function( key, value ) {
-      // @TODO stringify value when necessary
+      if ( util.isObject( value ) ) {
+        value = JSON.stringify( value )
+      }
+
       return new Promise( ( resolve, reject ) => {
         req.put( uri + key )
           .send( 'value=' + value )
@@ -47,6 +51,22 @@ module.exports = function etcd( endpoint ) {
 
             resolve({ node, prev })
           })
+      })
+    },
+
+    delete: function( key ) {
+      return new Promise( ( resolve, reject ) => {
+        req.del( uri + key )
+          .end( ( err, res ) => {
+            if ( err ) {
+              reject( err )
+              return
+            }
+
+            let node = res.body.node
+            let prev = res.body.prevNode
+          })
+
       })
     }
   }
