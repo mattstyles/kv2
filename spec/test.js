@@ -2,6 +2,12 @@
 import ava from 'ava'
 import KV from '../'
 
+const wait = async function( delay ) {
+  return {
+    then: cb => setTimeout( cb, delay )
+  }
+}
+
 /**
  * Note that currently all of these tests pull from the same underlying
  * etcd instance, meaning that they are not encapsulated, store state
@@ -54,6 +60,25 @@ test( 'kv2 should delete a value', async t => {
   t.is( await kv.get( 'foo' ), 'bar' )
   await kv.del( 'foo' )
   t.is( await kv.get( 'foo' ), null )
+})
+
+test( 'kv2 should set a value with a ttl', async t => {
+  let kv = KV({
+    store: 'etcd',
+    url: 'http://0.0.0.0:2379'
+  })
+
+  t.is( await kv.get( 'craw' ), null )
+  await kv.set( 'craw', 'baz', {
+    ttl: 2
+  })
+  let res = await kv.get( 'craw', {
+    raw: true
+  })
+  t.is( res.node.ttl, 2 )
+  t.truthy( res.node.expiration )
+  await wait( 3000 )
+  t.is( await kv.get( 'craw' ), null )
 })
 
 /**

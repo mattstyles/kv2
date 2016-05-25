@@ -10,7 +10,11 @@ module.exports = function etcd( opts ) {
   const uri = opts.url + '/v2/keys' + ( opts.id ? '/' + opts.id : '' ) + '/'
 
   return {
-    get: function( key ) {
+    get: function( key, options ) {
+      let opts = options || {
+        raw: false
+      }
+
       return new Promise( ( resolve, reject ) => {
         req.get( uri + key )
           .end( ( err, res ) => {
@@ -27,19 +31,31 @@ module.exports = function etcd( opts ) {
             }
 
             // Just return the current value
-            resolve( res.body.node.value )
+            resolve( opts.raw
+              ? res.body
+              : res.body.node.value )
           })
       })
     },
 
-    set: function( key, value ) {
+    set: function( key, value, options ) {
+      let opts = options || {
+        ttl: null,
+        raw: false
+      }
+
       if ( util.isObject( value ) ) {
         value = JSON.stringify( value )
       }
 
+      let body = 'value=' + value
+      if ( opts.ttl ) {
+        body += ';ttl=' + opts.ttl
+      }
+
       return new Promise( ( resolve, reject ) => {
         req.put( uri + key )
-          .send( 'value=' + value )
+          .send( body )
           .end( ( err, res ) => {
             if ( err ) {
               reject( err )
