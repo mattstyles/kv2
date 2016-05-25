@@ -54,7 +54,7 @@ module.exports = function etcd( opts ) {
       })
     },
 
-    delete: function( key ) {
+    del: function( key ) {
       return new Promise( ( resolve, reject ) => {
         req.del( uri + key )
           .end( ( err, res ) => {
@@ -65,8 +65,9 @@ module.exports = function etcd( opts ) {
 
             let node = res.body.node
             let prev = res.body.prevNode
-          })
 
+            resolve({ node, prev })
+          })
       })
     }
   }

@@ -8,7 +8,13 @@ import KV from '../'
  * will spill from test to test.
  */
 
-const test = ava
+// As the tests rely on the same underlying store its marginally safer
+// to run them serially
+const test = ava.serial
+
+/**
+ * Root store namespace
+ */
 
 test( 'kv2 should grab a value from the store', async t => {
   let kv = KV({
@@ -35,10 +41,24 @@ test( 'kv2 should set a value', async t => {
   })
 
   t.is( await kv.get( 'fred' ), null )
-  let res = await kv.set( 'fred', 'baz' )
+  await kv.set( 'fred', 'baz' )
   t.is( await kv.get( 'fred' ), 'baz' )
 })
 
+test( 'kv2 should delete a value', async t => {
+  let kv = KV({
+    store: 'etcd',
+    url: 'http://0.0.0.0:2379'
+  })
+
+  t.is( await kv.get( 'foo' ), 'bar' )
+  await kv.del( 'foo' )
+  t.is( await kv.get( 'foo' ), null )
+})
+
+/**
+ * Using an identifier namespace
+ */
 test( 'kv2 should grab a key from an identifier directory', async t => {
   let kv = KV({
     store: 'etcd',
@@ -69,4 +89,16 @@ test( 'kv2 should set a value within an identifier directory', async t => {
   t.is( await kv.get( 'freddy' ), null )
   await kv.set( 'freddy', 'netbaz' )
   t.is( await kv.get( 'freddy' ), 'netbaz' )
+})
+
+test( 'kv2 should delete a value within an identifier directory', async t => {
+  let kv = KV({
+    store: 'etcd',
+    url: 'http://0.0.0.0:2379',
+    id: 'net'
+  })
+
+  t.is( await kv.get( 'foo' ), 'netbar' )
+  await kv.del( 'foo' )
+  t.is( await kv.get( 'foo' ), null )
 })
