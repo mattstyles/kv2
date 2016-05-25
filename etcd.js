@@ -1,9 +1,12 @@
 
 'use strict'
 
+
 const util = require( 'util' )
 const url = require( 'url' )
 const req = require( 'superagent' )
+const EventEmitter = require( 'eventemitter3' )
+const Rx = require( 'rx-lite' )
 
 module.exports = function etcd( opts ) {
 
@@ -14,6 +17,8 @@ module.exports = function etcd( opts ) {
       let opts = options || {
         raw: false
       }
+
+      console.log( 'getting' )
 
       return new Promise( ( resolve, reject ) => {
         req.get( uri + key )
@@ -94,6 +99,45 @@ module.exports = function etcd( opts ) {
             resolve({ node, prev })
           })
       })
+    },
+
+    watch: function( key ) {
+      let request = null
+      let complete = false
+      let source = Rx.Observable.create( observer => {
+        let handler = ( err, res ) => {
+          if ( err ) {
+            observer.onError( err )
+            return
+          }
+
+          observer.onNext({
+            node: res.body.node,
+            prev: res.body.prevNode
+          })
+
+          // Start watching again
+          console.log( 'testing' )
+          if ( !complete ) {
+            request = req.get( uri + key + '?wait=true' )
+              .end( handler )
+          }
+        }
+
+        // Initial request
+        // request.end( handler )
+        request = req.get( uri + key + '?wait=true' )
+          .end( handler )
+
+
+        // Cleanup
+        return function() {
+          complete = true
+          request.abort()
+        }
+      })
+
+      return source
     }
   }
 }

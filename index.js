@@ -34,5 +34,19 @@ module.exports = function kv( opts ) {
     wrapper[ method ] = promisify( method, store )
   })
 
+  /**
+   * Returns a stream that emits new values
+   */
+  wrapper.watch = function watch( key, cb ) {
+    if ( cb ) {
+      return store
+        .watch( key )
+        .subscribe( cb )
+    }
+
+    return store
+      .watch( key )
+  }
+
   return wrapper
 }
