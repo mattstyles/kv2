@@ -31,6 +31,6 @@
   "dependencies": {
     "eventemitter3": "^1.2.0",
     "rx-lite": "^4.0.8",
-    "superagent": "^2.0.0-alpha.3"
+    "superagent": "^5.1.0"
   }
 }
